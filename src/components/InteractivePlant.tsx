@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF, OrbitControls, PerspectiveCamera, ContactShadows, Environment, useTexture } from '@react-three/drei';
@@ -6,10 +5,11 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronUp, Droplet, ThermometerIcon, Sun, Sprout } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import * as THREE from 'three';
 
 // This is a placeholder model - in a production app, you would use a real plant model
 function PlantModel({ soilMoisture, temperature, lightIntensity, nutrientLevel, ...props }) {
-  const group = useRef();
+  const group = useRef<THREE.Group>();
   const { nodes, materials } = {
     nodes: {
       pot: { geometry: new THREE.BoxGeometry(1, 1, 1) },
@@ -57,13 +57,16 @@ function PlantModel({ soilMoisture, temperature, lightIntensity, nutrientLevel, 
     if (group.current.children.length > 3) {
       // Animate leaves subtly
       for (let i = 3; i < group.current.children.length; i++) {
-        group.current.children[i].rotation.z = Math.sin(t / 2 + i) * 0.05;
+        const child = group.current.children[i] as THREE.Object3D;
+        if (child.rotation) {
+          child.rotation.z = Math.sin(t / 2 + i) * 0.05;
+        }
       }
     }
   });
 
   return (
-    <group ref={group} {...props} position={[0, -1.2, 0]}>
+    <group ref={group as React.RefObject<THREE.Group>} {...props} position={[0, -1.2, 0]}>
       {/* Pot */}
       <mesh 
         castShadow 
