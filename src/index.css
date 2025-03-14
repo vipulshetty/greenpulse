@@ -93,6 +93,9 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', sans-serif;
+    background-image: 
+      radial-gradient(circle at 20% 10%, rgba(155, 222, 172, 0.1) 0%, transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(166, 124, 82, 0.05) 0%, transparent 40%);
   }
 }
 
@@ -127,5 +130,90 @@
   
   .status-alert {
     @apply bg-plant-alert animate-pulse-subtle;
+  }
+
+  /* New glass effect */
+  .glass-panel {
+    @apply backdrop-blur-sm bg-white/10 border border-white/20 shadow-xl;
+  }
+
+  /* Fancy gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-plant-primary to-accent bg-clip-text text-transparent;
+  }
+}
+
+@layer utilities {
+  /* Enhanced animations */
+  .hover-float {
+    @apply transition-transform duration-300 hover:-translate-y-1;
+  }
+  
+  .hover-glow {
+    @apply transition-all duration-300 hover:shadow-[0_0_15px_rgba(155,222,172,0.5)];
+  }
+  
+  .animate-bounce-subtle {
+    animation: bounce-subtle 3s ease-in-out infinite;
+  }
+  
+  .animate-spin-slow {
+    animation: spin 8s linear infinite;
+  }
+}
+
+@keyframes bounce-subtle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in {
+  0% {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes progress-fill {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: var(--progress-value);
   }
 }

@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { AlertData } from './AlertItem';
 import AlertItem from './AlertItem';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface TopNavProps {
   alerts: AlertData[];
@@ -25,7 +26,12 @@ const TopNav = ({ alerts, className }: TopNavProps) => {
   const unreadAlerts = alerts.filter(alert => !alert.read);
 
   return (
-    <div className={`flex items-center justify-between p-4 ${className}`}>
+    <motion.div 
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className={`flex items-center justify-between p-4 backdrop-blur-sm z-10 ${className}`}
+    >
       <div className="flex items-center">
         <SidebarTrigger />
       </div>
@@ -35,12 +41,25 @@ const TopNav = ({ alerts, className }: TopNavProps) => {
         <DropdownMenu open={showAlerts} onOpenChange={setShowAlerts}>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5" />
-              {unreadAlerts.length > 0 && (
-                <Badge variant="destructive" className="absolute -top-1 -right-1 flex items-center justify-center h-5 w-5 p-0 text-xs">
-                  {unreadAlerts.length}
-                </Badge>
-              )}
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <Bell className="h-5 w-5" />
+                <AnimatePresence>
+                  {unreadAlerts.length > 0 && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                    >
+                      <Badge variant="destructive" className="absolute -top-1 -right-1 flex items-center justify-center h-5 w-5 p-0 text-xs">
+                        {unreadAlerts.length}
+                      </Badge>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-80 max-h-[400px] overflow-y-auto p-0">
@@ -53,32 +72,53 @@ const TopNav = ({ alerts, className }: TopNavProps) => {
               </div>
             </div>
             <div className="p-1">
-              {alerts.length > 0 ? (
-                alerts.map(alert => (
-                  <AlertItem key={alert.id} alert={alert} />
-                ))
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <p>No notifications</p>
-                </div>
-              )}
+              <AnimatePresence>
+                {alerts.length > 0 ? (
+                  alerts.map((alert, index) => (
+                    <motion.div
+                      key={alert.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <AlertItem alert={alert} />
+                    </motion.div>
+                  ))
+                ) : (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-center py-8 text-muted-foreground"
+                  >
+                    <p>No notifications</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
         
         {/* Theme toggle */}
-        <Button variant="ghost" size="icon">
-          <SunMoon className="h-5 w-5" />
-        </Button>
+        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+          <Button variant="ghost" size="icon">
+            <SunMoon className="h-5 w-5" />
+          </Button>
+        </motion.div>
         
         {/* User menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="gap-2">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback>GP</AvatarFallback>
-              </Avatar>
-              <span className="font-medium hidden sm:inline-block">Garden Admin</span>
+              <motion.div 
+                whileHover={{ scale: 1.05 }}
+                className="flex items-center gap-2"
+              >
+                <Avatar className="h-8 w-8 border-2 border-primary/30">
+                  <AvatarFallback>GP</AvatarFallback>
+                </Avatar>
+                <span className="font-medium hidden sm:inline-block">Garden Admin</span>
+              </motion.div>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -97,7 +137,7 @@ const TopNav = ({ alerts, className }: TopNavProps) => {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

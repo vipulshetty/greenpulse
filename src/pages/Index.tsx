@@ -13,6 +13,8 @@ import Layout from '@/components/Layout';
 import SensorCard from '@/components/SensorCard';
 import ChartCard from '@/components/ChartCard';
 import ControlPanel from '@/components/ControlPanel';
+import PageTransition from '@/components/PageTransition';
+import { motion } from 'framer-motion';
 
 // Mock data for demonstration
 const generateMockTimeData = (hours: number, baseValue: number, variance: number) => {
@@ -95,15 +97,37 @@ const Index = () => {
     return 'healthy';
   };
 
+  // Stagger animations for child components
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
   return (
-    <>
+    <PageTransition>
       <Helmet>
         <title>Dashboard | GreenPulse</title>
       </Helmet>
       
       <Layout>
-        <div className="space-y-6">
-          <h1 className="text-2xl font-semibold">Plant Monitoring Dashboard</h1>
+        <motion.div 
+          className="space-y-6"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h1 className="text-2xl font-semibold gradient-text">Plant Monitoring Dashboard</h1>
+          </motion.div>
           
           {/* Sensor Cards Grid */}
           <div className="dashboard-grid">
@@ -204,9 +228,9 @@ const Index = () => {
             
             <ControlPanel className="lg:col-span-1" />
           </div>
-        </div>
+        </motion.div>
       </Layout>
-    </>
+    </PageTransition>
   );
 };
 
