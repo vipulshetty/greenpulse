@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Bell, User, SunMoon } from 'lucide-react';
+import { Bell, User, SunMoon, Settings, LogOut } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { 
   DropdownMenu, 
