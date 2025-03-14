@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -97,6 +96,10 @@
       radial-gradient(circle at 20% 10%, rgba(155, 222, 172, 0.1) 0%, transparent 40%),
       radial-gradient(circle at 80% 80%, rgba(166, 124, 82, 0.05) 0%, transparent 40%);
   }
+
+  canvas {
+    touch-action: none;
+  }
 }
 
 @layer components {
@@ -140,6 +143,16 @@
   /* Fancy gradient text */
   .gradient-text {
     @apply bg-gradient-to-r from-plant-primary to-accent bg-clip-text text-transparent;
+  }
+
+  /* 3D plant view customization */
+  .plant-view {
+    @apply relative bg-gradient-to-b from-background to-secondary/20 rounded-xl overflow-hidden;
+  }
+
+  .plant-detail-indicator {
+    @apply absolute flex items-center justify-center w-6 h-6 rounded-full bg-background/80 shadow-sm cursor-pointer transition-transform;
+    transform-origin: center center;
   }
 }
 

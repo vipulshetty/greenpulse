@@ -2,6 +2,7 @@
 import React from 'react';
 import ChartCard from './ChartCard';
 import ControlPanel from './ControlPanel';
+import InteractivePlant from './InteractivePlant';
 import { motion } from 'framer-motion';
 
 interface DataPoint {
@@ -12,9 +13,17 @@ interface DataPoint {
 interface DashboardChartsProps {
   temperatureData: DataPoint[];
   moistureData: DataPoint[];
+  sensorData: {
+    temperature: number;
+    humidity: number;
+    soilMoisture: number;
+    lightIntensity: number;
+    nitrogenLevel: number;
+    phosphorusLevel: number;
+  };
 }
 
-const DashboardCharts = ({ temperatureData, moistureData }: DashboardChartsProps) => {
+const DashboardCharts = ({ temperatureData, moistureData, sensorData }: DashboardChartsProps) => {
   return (
     <motion.div 
       className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6"
@@ -22,6 +31,8 @@ const DashboardCharts = ({ temperatureData, moistureData }: DashboardChartsProps
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.3 }}
     >
+      <InteractivePlant sensorData={sensorData} className="lg:col-span-3 mb-2" />
+      
       <ChartCard
         title="Temperature History (24h)"
         data={temperatureData}

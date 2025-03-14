@@ -80,10 +80,11 @@ const Index = () => {
           {/* Sensor Cards Grid */}
           <SensorGrid sensorData={sensorData} />
           
-          {/* Charts and Control Panel */}
+          {/* Charts, 3D Plant and Control Panel */}
           <DashboardCharts 
             temperatureData={temperatureData}
             moistureData={moistureData}
+            sensorData={sensorData}
           />
         </div>
       </Layout>
