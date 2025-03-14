@@ -1,22 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { 
-  Droplet, 
-  ThermometerIcon, 
-  Sun, 
-  Sprout, 
-  Wind, 
-  Cloud
-} from 'lucide-react';
 import Layout from '@/components/Layout';
-import SensorCard from '@/components/SensorCard';
-import ChartCard from '@/components/ChartCard';
-import ControlPanel from '@/components/ControlPanel';
+import SensorGrid from '@/components/SensorGrid';
+import DashboardCharts from '@/components/DashboardCharts';
 import PageTransition from '@/components/PageTransition';
 import { motion } from 'framer-motion';
 
-// Mock data for demonstration
+// Mock data generation utility
 const generateMockTimeData = (hours: number, baseValue: number, variance: number) => {
   const data = [];
   const now = new Date();
@@ -68,45 +59,6 @@ const Index = () => {
   // Mock data for charts
   const temperatureData = generateMockTimeData(24, 23, 5);
   const moistureData = generateMockTimeData(24, 45, 15);
-  const lightData = generateMockTimeData(24, 70, 30);
-  
-  // Determine status based on sensor values
-  const getMoistureStatus = (value: number) => {
-    if (value < 30) return 'alert';
-    if (value < 40) return 'warning';
-    if (value > 80) return 'warning';
-    return 'healthy';
-  };
-  
-  const getTemperatureStatus = (value: number) => {
-    if (value < 15 || value > 30) return 'alert';
-    if (value < 18 || value > 27) return 'warning';
-    return 'healthy';
-  };
-  
-  const getLightStatus = (value: number) => {
-    if (value < 20) return 'alert';
-    if (value < 40) return 'warning';
-    if (value > 90) return 'warning';
-    return 'healthy';
-  };
-  
-  const getNutrientStatus = (value: number) => {
-    if (value < 5) return 'alert';
-    if (value < 10) return 'warning';
-    return 'healthy';
-  };
-
-  // Stagger animations for child components
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
 
   return (
     <PageTransition>
@@ -115,120 +67,25 @@ const Index = () => {
       </Helmet>
       
       <Layout>
-        <motion.div 
-          className="space-y-6"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          <motion.div 
+        <div className="space-y-6">
+          <motion.h1 
+            className="text-2xl font-semibold gradient-text"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h1 className="text-2xl font-semibold gradient-text">Plant Monitoring Dashboard</h1>
-          </motion.div>
+            Plant Monitoring Dashboard
+          </motion.h1>
           
           {/* Sensor Cards Grid */}
-          <div className="dashboard-grid">
-            <SensorCard
-              title="Soil Moisture"
-              value={sensorData.soilMoisture}
-              unit="%"
-              icon={<Droplet />}
-              status={getMoistureStatus(sensorData.soilMoisture)}
-              minValue={0}
-              maxValue={100}
-            />
-            
-            <SensorCard
-              title="Temperature"
-              value={sensorData.temperature}
-              unit="°C"
-              icon={<ThermometerIcon />}
-              status={getTemperatureStatus(sensorData.temperature)}
-              minValue={10}
-              maxValue={35}
-            />
-            
-            <SensorCard
-              title="Humidity"
-              value={sensorData.humidity}
-              unit="%"
-              icon={<Cloud />}
-              status="healthy"
-              minValue={0}
-              maxValue={100}
-            />
-            
-            <SensorCard
-              title="Light Intensity"
-              value={sensorData.lightIntensity}
-              unit="%"
-              icon={<Sun />}
-              status={getLightStatus(sensorData.lightIntensity)}
-              minValue={0}
-              maxValue={100}
-            />
-            
-            <SensorCard
-              title="Nitrogen Level"
-              value={sensorData.nitrogenLevel}
-              unit="mg/kg"
-              icon={<Sprout />}
-              status={getNutrientStatus(sensorData.nitrogenLevel)}
-              minValue={0}
-              maxValue={30}
-            />
-            
-            <SensorCard
-              title="Phosphorus Level"
-              value={sensorData.phosphorusLevel}
-              unit="mg/kg"
-              icon={<Sprout />}
-              status={getNutrientStatus(sensorData.phosphorusLevel)}
-              minValue={0}
-              maxValue={20}
-            />
-            
-            <SensorCard
-              title="Wind Speed"
-              value="3.2"
-              unit="m/s"
-              icon={<Wind />}
-              status="normal"
-            />
-            
-            <SensorCard
-              title="Forecast"
-              value="Partly Cloudy"
-              unit=""
-              icon={<Cloud />}
-              status="normal"
-            />
-          </div>
+          <SensorGrid sensorData={sensorData} />
           
           {/* Charts and Control Panel */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-            <ChartCard
-              title="Temperature History (24h)"
-              data={temperatureData}
-              yAxisUnit="°C"
-              color="#f59e0b"
-              className="lg:col-span-1"
-            />
-            
-            <ChartCard
-              title="Moisture History (24h)"
-              data={moistureData}
-              yAxisUnit="%"
-              color="#3b82f6"
-              className="lg:col-span-1"
-            />
-            
-            <ControlPanel className="lg:col-span-1" />
-          </div>
-        </motion.div>
+          <DashboardCharts 
+            temperatureData={temperatureData}
+            moistureData={moistureData}
+          />
+        </div>
       </Layout>
     </PageTransition>
   );
