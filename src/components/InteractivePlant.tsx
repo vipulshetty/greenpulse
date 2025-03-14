@@ -1,156 +1,13 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { useGLTF, OrbitControls, PerspectiveCamera, ContactShadows, Environment, useTexture } from '@react-three/drei';
+
+import React, { useState } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, PerspectiveCamera, ContactShadows, Environment } from '@react-three/drei';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronUp, Droplet, ThermometerIcon, Sun, Sprout } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import * as THREE from 'three';
-
-// This is a placeholder model - in a production app, you would use a real plant model
-function PlantModel({ soilMoisture, temperature, lightIntensity, nutrientLevel, ...props }) {
-  const group = useRef<THREE.Group>();
-  const { nodes, materials } = {
-    nodes: {
-      pot: { geometry: new THREE.BoxGeometry(1, 1, 1) },
-      soil: { geometry: new THREE.CylinderGeometry(0.8, 0.8, 0.3, 32) },
-      stem1: { geometry: new THREE.CylinderGeometry(0.05, 0.08, 1.5, 8) },
-      stem2: { geometry: new THREE.CylinderGeometry(0.04, 0.06, 1.2, 8) },
-      leaf1: { geometry: new THREE.SphereGeometry(0.3, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2) },
-      leaf2: { geometry: new THREE.SphereGeometry(0.25, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2) },
-      leaf3: { geometry: new THREE.SphereGeometry(0.35, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2) },
-      leaf4: { geometry: new THREE.SphereGeometry(0.28, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2) },
-    },
-    materials: {
-      pot: new THREE.MeshStandardMaterial({ color: '#a67c52' }),
-      soil: new THREE.MeshStandardMaterial({ color: '#3a2a18', roughness: 1 }),
-      stem: new THREE.MeshStandardMaterial({ color: '#4a7c3d', roughness: 0.8 }),
-      leaf: new THREE.MeshStandardMaterial({ 
-        color: '#9bdeac', 
-        roughness: 0.5, 
-        metalness: 0.1, 
-        side: THREE.DoubleSide 
-      }),
-    }
-  };
-
-  // Calculate plant health based on sensor values (simplified)
-  const plantHealth = (soilMoisture + lightIntensity + nutrientLevel) / 3;
-  const leafColor = plantHealth > 70 
-    ? '#9bdeac' // Healthy
-    : plantHealth > 40 
-      ? '#c5e29f' // Moderate
-      : '#ebd896'; // Unhealthy
-
-  // Update leaf material color based on plant health
-  useEffect(() => {
-    if (materials.leaf) {
-      materials.leaf.color.set(leafColor);
-    }
-  }, [plantHealth, materials.leaf, leafColor]);
-
-  // Subtle animation for leaves
-  useFrame((state) => {
-    if (!group.current) return;
-    const t = state.clock.getElapsedTime();
-    group.current.rotation.y = Math.sin(t / 4) * 0.1;
-    if (group.current.children.length > 3) {
-      // Animate leaves subtly
-      for (let i = 3; i < group.current.children.length; i++) {
-        const child = group.current.children[i] as THREE.Object3D;
-        if (child.rotation) {
-          child.rotation.z = Math.sin(t / 2 + i) * 0.05;
-        }
-      }
-    }
-  });
-
-  return (
-    <group ref={group as React.RefObject<THREE.Group>} {...props} position={[0, -1.2, 0]}>
-      {/* Pot */}
-      <mesh 
-        castShadow 
-        receiveShadow 
-        geometry={nodes.pot.geometry} 
-        material={materials.pot} 
-        position={[0, 0, 0]} 
-        scale={[1, 0.8, 1]}
-      />
-      
-      {/* Soil with moisture level visualization */}
-      <mesh 
-        receiveShadow 
-        geometry={nodes.soil.geometry} 
-        position={[0, 0.5, 0]} 
-        scale={[1, 0.2, 1]}
-      >
-        <meshStandardMaterial 
-          color="#3a2a18" 
-          roughness={1} 
-          metalness={0.1} 
-          opacity={1} 
-          transparent
-        />
-        <mesh 
-          position={[0, -0.1, 0]} 
-          scale={[soilMoisture / 100, 0.1, soilMoisture / 100]}
-        >
-          <cylinderGeometry args={[1, 1, 1, 32]} />
-          <meshStandardMaterial color="#553c25" transparent opacity={0.8} />
-        </mesh>
-      </mesh>
-      
-      {/* Stems */}
-      <mesh 
-        castShadow 
-        geometry={nodes.stem1.geometry} 
-        material={materials.stem} 
-        position={[0, 1.2, 0]} 
-      />
-      <mesh 
-        castShadow 
-        geometry={nodes.stem2.geometry} 
-        material={materials.stem} 
-        position={[0.3, 1.4, 0.2]} 
-        rotation={[0, 0, Math.PI / 6]} 
-      />
-      
-      {/* Leaves */}
-      <mesh 
-        castShadow 
-        geometry={nodes.leaf1.geometry} 
-        material={materials.leaf} 
-        position={[0, 1.8, 0]} 
-        rotation={[0, 0, 0]} 
-        scale={[1, 0.2, 1]}
-      />
-      <mesh 
-        castShadow 
-        geometry={nodes.leaf2.geometry} 
-        material={materials.leaf} 
-        position={[0.6, 1.6, 0.2]} 
-        rotation={[0, Math.PI / 3, 0]} 
-        scale={[1, 0.15, 1]}
-      />
-      <mesh 
-        castShadow 
-        geometry={nodes.leaf3.geometry} 
-        material={materials.leaf} 
-        position={[-0.5, 1.5, -0.2]} 
-        rotation={[0, -Math.PI / 4, 0]} 
-        scale={[1, 0.18, 1]}
-      />
-      <mesh 
-        castShadow 
-        geometry={nodes.leaf4.geometry} 
-        material={materials.leaf} 
-        position={[0.2, 2.1, 0.5]} 
-        rotation={[Math.PI / 6, Math.PI / 5, 0]} 
-        scale={[1, 0.12, 1]}
-      />
-    </group>
-  );
-}
+import PlantModel from './plant/PlantModel';
+import PlantSensorDetails from './plant/PlantSensorDetails';
 
 interface InteractivePlantProps {
   sensorData: {
@@ -259,42 +116,11 @@ const InteractivePlant: React.FC<InteractivePlantProps> = ({ sensorData, classNa
 
         {/* Plant detail indicators - appear when hovering over the model */}
         {showDetails && (
-          <motion.div 
-            className="absolute bottom-16 left-0 right-0 mx-auto px-4 pb-4 space-y-2 w-full"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-              {details.map((detail) => (
-                <motion.div 
-                  key={detail.id}
-                  className={cn(
-                    "bg-background/90 backdrop-blur-sm px-3 py-2 rounded-lg cursor-pointer transition-all shadow-sm",
-                    activeDetail === detail.id ? "ring-2 ring-primary" : "hover:bg-background"
-                  )}
-                  onClick={() => setActiveDetail(detail.id === activeDetail ? null : detail.id)}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <div className="flex items-center gap-2">
-                    <div 
-                      className="p-1.5 rounded-full" 
-                      style={{ backgroundColor: `${detail.color}20` }}
-                    >
-                      <div style={{ color: detail.color }}>{detail.icon}</div>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">{detail.label}</p>
-                      <p className="font-medium">
-                        {detail.value.toFixed(1)}{detail.unit}
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
+          <PlantSensorDetails 
+            details={details}
+            activeDetail={activeDetail}
+            setActiveDetail={setActiveDetail}
+          />
         )}
       </div>
     </motion.div>
