@@ -108,7 +108,7 @@ const ChartCard = ({
                     r: 6, 
                     strokeWidth: 0,
                     fill: color,
-                    boxShadow: '0 0 10px rgba(0, 0, 0, 0.2)'
+                    // Removing the boxShadow property as it's not valid for SVG elements in Recharts
                   }}
                   animationDuration={1500}
                   animationEasing="ease-out"
