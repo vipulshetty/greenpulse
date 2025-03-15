@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Droplet, ThermometerIcon, Sun, Sprout } from 'lucide-react';
+import { Droplet, Thermometer as ThermometerIcon, Sun, Sprout } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SensorDetail {
