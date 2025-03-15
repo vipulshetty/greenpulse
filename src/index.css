@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -93,8 +94,8 @@
     @apply bg-background text-foreground;
     font-family: 'Inter', sans-serif;
     background-image: 
-      radial-gradient(circle at 20% 10%, rgba(155, 222, 172, 0.1) 0%, transparent 40%),
-      radial-gradient(circle at 80% 80%, rgba(166, 124, 82, 0.05) 0%, transparent 40%);
+      radial-gradient(circle at 20% 10%, rgba(155, 222, 172, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(166, 124, 82, 0.08) 0%, transparent 50%);
   }
 
   canvas {
@@ -104,15 +105,15 @@
 
 @layer components {
   .sensor-card {
-    @apply bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg;
+    @apply bg-white/90 rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl border border-primary/10 backdrop-blur-sm;
   }
   
   .sensor-value {
-    @apply text-3xl font-semibold;
+    @apply text-3xl font-semibold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent;
   }
   
   .sensor-label {
-    @apply text-sm text-muted-foreground uppercase tracking-wider;
+    @apply text-sm text-muted-foreground uppercase tracking-wider font-medium;
   }
   
   .dashboard-grid {
@@ -124,46 +125,56 @@
   }
   
   .status-healthy {
-    @apply bg-plant-success animate-pulse-subtle;
+    @apply bg-plant-success animate-pulse-slow;
   }
   
   .status-warning {
-    @apply bg-plant-warning animate-pulse-subtle;
+    @apply bg-plant-warning animate-pulse-medium;
   }
   
   .status-alert {
-    @apply bg-plant-alert animate-pulse-subtle;
+    @apply bg-plant-alert animate-pulse-fast;
   }
 
-  /* New glass effect */
+  /* Enhanced glass effect */
   .glass-panel {
-    @apply backdrop-blur-sm bg-white/10 border border-white/20 shadow-xl;
+    @apply backdrop-blur-md bg-white/20 border border-white/30 shadow-xl;
   }
 
-  /* Fancy gradient text */
+  /* Enhanced gradient text */
   .gradient-text {
-    @apply bg-gradient-to-r from-plant-primary to-accent bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-plant-primary via-accent to-plant-primary bg-clip-text text-transparent bg-size-200 animate-gradient;
   }
 
   /* 3D plant view customization */
   .plant-view {
-    @apply relative bg-gradient-to-b from-background to-secondary/20 rounded-xl overflow-hidden;
+    @apply relative bg-gradient-to-b from-background to-secondary/30 rounded-xl overflow-hidden shadow-inner border border-primary/10;
   }
 
   .plant-detail-indicator {
-    @apply absolute flex items-center justify-center w-6 h-6 rounded-full bg-background/80 shadow-sm cursor-pointer transition-transform;
+    @apply absolute flex items-center justify-center w-7 h-7 rounded-full bg-background/90 shadow-lg cursor-pointer transition-transform;
     transform-origin: center center;
+  }
+  
+  /* Card effect */
+  .float-card {
+    @apply hover:shadow-xl transition-all duration-500 hover:-translate-y-1;
+  }
+  
+  /* Button effects */
+  .btn-animated {
+    @apply relative overflow-hidden transition-all duration-300 after:absolute after:inset-0 after:z-[-1] after:opacity-0 after:transition-opacity hover:after:opacity-100 after:bg-gradient-to-r after:from-primary/80 after:to-accent/80;
   }
 }
 
 @layer utilities {
   /* Enhanced animations */
   .hover-float {
-    @apply transition-transform duration-300 hover:-translate-y-1;
+    @apply transition-transform duration-300 hover:-translate-y-2;
   }
   
   .hover-glow {
-    @apply transition-all duration-300 hover:shadow-[0_0_15px_rgba(155,222,172,0.5)];
+    @apply transition-all duration-300 hover:shadow-[0_0_20px_rgba(155,222,172,0.6)];
   }
   
   .animate-bounce-subtle {
@@ -173,6 +184,30 @@
   .animate-spin-slow {
     animation: spin 8s linear infinite;
   }
+  
+  .animate-pulse-slow {
+    animation: pulse 3s ease-in-out infinite;
+  }
+  
+  .animate-pulse-medium {
+    animation: pulse 2s ease-in-out infinite;
+  }
+  
+  .animate-pulse-fast {
+    animation: pulse 1s ease-in-out infinite;
+  }
+  
+  .animate-gradient {
+    animation: gradientShift 8s ease infinite;
+  }
+  
+  .bg-size-200 {
+    background-size: 200% 200%;
+  }
+  
+  .blur-backdrop {
+    backdrop-filter: blur(8px);
+  }
 }
 
 @keyframes bounce-subtle {
@@ -180,16 +215,18 @@
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-5px);
+    transform: translateY(-8px);
   }
 }
 
-@keyframes pulse-subtle {
+@keyframes pulse {
   0%, 100% {
     opacity: 1;
+    transform: scale(1);
   }
   50% {
-    opacity: 0.8;
+    opacity: 0.7;
+    transform: scale(0.98);
   }
 }
 
@@ -213,7 +250,7 @@
 
 @keyframes slide-in {
   0% {
-    transform: translateY(10px);
+    transform: translateY(20px);
     opacity: 0;
   }
   100% {
@@ -228,5 +265,38 @@
   }
   100% {
     width: var(--progress-value);
+  }
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Added fancy reveal animations */
+@keyframes reveal {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(155, 222, 172, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(155, 222, 172, 0.8);
   }
 }
