@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronUp, Droplet, ThermometerIcon, Sun, Sprout } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import PlantCanvas from './plant/PlantCanvas';
 import PlantSensorDetails from './plant/PlantSensorDetails';
