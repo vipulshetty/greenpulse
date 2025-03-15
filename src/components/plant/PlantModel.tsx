@@ -8,6 +8,7 @@ interface PlantModelProps {
   temperature: number;
   lightIntensity: number;
   nutrientLevel: number;
+  highlightedPart?: string | null;
   position?: [number, number, number];
   [key: string]: any;
 }
@@ -17,6 +18,7 @@ const PlantModel: React.FC<PlantModelProps> = ({
   temperature, 
   lightIntensity, 
   nutrientLevel,
+  highlightedPart,
   ...props 
 }) => {
   const group = useRef<THREE.Group>(null);
@@ -58,6 +60,44 @@ const PlantModel: React.FC<PlantModelProps> = ({
       materials.leaf.color.set(leafColor);
     }
   }, [plantHealth, materials.leaf, leafColor]);
+
+  // Highlight selected part if needed
+  useEffect(() => {
+    // Example of highlighting different parts based on activeDetail
+    if (highlightedPart && group.current) {
+      // Reset all materials to original
+      materials.pot.emissive = new THREE.Color(0x000000);
+      materials.soil.emissive = new THREE.Color(0x000000);
+      materials.stem.emissive = new THREE.Color(0x000000);
+      materials.leaf.emissive = new THREE.Color(0x000000);
+      
+      // Highlight based on the active detail
+      switch(highlightedPart) {
+        case 'moisture':
+          materials.soil.emissive = new THREE.Color(0x3b82f6);
+          materials.soil.emissiveIntensity = 0.3;
+          break;
+        case 'temperature':
+          materials.stem.emissive = new THREE.Color(0xf59e0b);
+          materials.stem.emissiveIntensity = 0.3;
+          break;
+        case 'light':
+          materials.leaf.emissive = new THREE.Color(0xfbbf24);
+          materials.leaf.emissiveIntensity = 0.3;
+          break;
+        case 'nutrients':
+          materials.pot.emissive = new THREE.Color(0x10b981);
+          materials.pot.emissiveIntensity = 0.3;
+          break;
+      }
+    } else if (group.current) {
+      // Reset highlighting
+      materials.pot.emissive = new THREE.Color(0x000000);
+      materials.soil.emissive = new THREE.Color(0x000000);
+      materials.stem.emissive = new THREE.Color(0x000000);
+      materials.leaf.emissive = new THREE.Color(0x000000);
+    }
+  }, [highlightedPart]);
 
   // Subtle animation for leaves
   useFrame((state) => {
