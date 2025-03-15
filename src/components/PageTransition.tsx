@@ -11,23 +11,38 @@ const PageTransition = ({ children }: PageTransitionProps) => {
     initial: {
       opacity: 0,
       y: 20,
-      scale: 0.98
+      scale: 0.98,
+      filter: "blur(8px)"
     },
     animate: {
       opacity: 1,
       y: 0,
       scale: 1,
+      filter: "blur(0px)",
       transition: {
-        duration: 0.6,
+        duration: 0.8,
         ease: [0.22, 1, 0.36, 1],
-        staggerChildren: 0.1
+        staggerChildren: 0.15
       }
     },
     exit: {
       opacity: 0,
       y: -10,
+      filter: "blur(8px)",
       transition: {
-        duration: 0.4
+        duration: 0.6
+      }
+    }
+  };
+
+  const childVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        duration: 0.8,
+        ease: [0.22, 1, 0.36, 1],
       }
     }
   };
@@ -38,9 +53,11 @@ const PageTransition = ({ children }: PageTransitionProps) => {
       animate="animate"
       exit="exit"
       variants={pageVariants}
-      className="will-change-transform"
+      className="will-change-transform min-h-screen"
     >
-      {children}
+      <motion.div variants={childVariants}>
+        {children}
+      </motion.div>
     </motion.div>
   );
 };

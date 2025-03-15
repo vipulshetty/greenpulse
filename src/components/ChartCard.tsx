@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area } from 'recharts';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
@@ -39,15 +39,22 @@ const ChartCard = ({
         delay: 0.1 
       }}
       whileHover={{ 
-        scale: 1.02, 
+        scale: 1.02,
+        boxShadow: "0px 10px 30px rgba(0, 0, 0, 0.15)",
         transition: { type: "spring", stiffness: 400 } 
       }}
     >
-      <Card className={cn("overflow-hidden backdrop-blur-md bg-card/80 border border-primary/10 shadow-lg", className)}>
+      <Card className={cn("overflow-hidden backdrop-blur-md bg-gradient-to-br from-card/90 to-card/70 border border-primary/10 shadow-lg rounded-xl", className)}>
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg font-medium bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-            {title}
-          </CardTitle>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <CardTitle className="text-lg font-medium bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              {title}
+            </CardTitle>
+          </motion.div>
         </CardHeader>
         <CardContent className="p-4">
           <motion.div 
@@ -66,19 +73,36 @@ const ChartCard = ({
                   bottom: 5,
                 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(224, 224, 224, 0.4)" />
+                <defs>
+                  <linearGradient id={`colorGradient-${color.replace('#', '')}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={color} stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor={color} stopOpacity={0.2}/>
+                  </linearGradient>
+                  <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="4" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                  </filter>
+                </defs>
+                
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(224, 224, 224, 0.25)" />
+                
                 <XAxis 
                   dataKey="time" 
                   tick={{ fontSize: 12, fill: 'rgba(120, 120, 120, 0.9)' }}
                   tickMargin={10}
                   stroke="rgba(180, 180, 180, 0.3)"
+                  tickLine={false}
                 />
+                
                 <YAxis 
                   unit={yAxisUnit}
                   tick={{ fontSize: 12, fill: 'rgba(120, 120, 120, 0.9)' }}
                   tickMargin={10}
                   stroke="rgba(180, 180, 180, 0.3)"
+                  tickLine={false}
+                  axisLine={false}
                 />
+                
                 <Tooltip 
                   contentStyle={{ 
                     backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -92,12 +116,15 @@ const ChartCard = ({
                   labelFormatter={(label) => `Time: ${label}`}
                   animationDuration={300}
                 />
-                <defs>
-                  <linearGradient id={`colorGradient-${color.replace('#', '')}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={color} stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor={color} stopOpacity={0.2}/>
-                  </linearGradient>
-                </defs>
+                
+                <Area
+                  type="monotone"
+                  dataKey={dataKey}
+                  fill={`url(#colorGradient-${color.replace('#', '')})`}
+                  stroke="transparent"
+                  animationDuration={2000}
+                />
+                
                 <Line
                   type="monotone"
                   dataKey={dataKey}
@@ -108,7 +135,7 @@ const ChartCard = ({
                     r: 6, 
                     strokeWidth: 0,
                     fill: color,
-                    // Removing the boxShadow property as it's not valid for SVG elements in Recharts
+                    filter: "url(#glow)"
                   }}
                   animationDuration={1500}
                   animationEasing="ease-out"
