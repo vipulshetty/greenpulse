@@ -104,38 +104,42 @@ const InteractivePlant: React.FC<InteractivePlantProps> = ({ sensorData, classNa
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7, duration: 0.5 }}
         >
-          <Button
-            variant="secondary"
-            size="sm"
-            className="absolute bottom-4 right-4 gap-1 shadow-xl bg-background/80 backdrop-blur-md border border-primary/10"
-            onClick={toggleDetails}
+          <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            className="absolute bottom-4 right-4"
           >
-            <AnimatePresence mode="wait">
-              {showDetails ? (
-                <motion.div 
-                  className="flex items-center gap-1"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  key="hide"
-                >
-                  Hide Details <ChevronDown className="h-4 w-4" />
-                </motion.div>
-              ) : (
-                <motion.div 
-                  className="flex items-center gap-1"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  key="show"
-                >
-                  Show Details <ChevronUp className="h-4 w-4" />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="gap-1 shadow-xl bg-background/80 backdrop-blur-md border border-primary/10"
+              onClick={toggleDetails}
+            >
+              <AnimatePresence mode="wait">
+                {showDetails ? (
+                  <motion.div 
+                    className="flex items-center gap-1"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    key="hide"
+                  >
+                    Hide Details <ChevronDown className="h-4 w-4" />
+                  </motion.div>
+                ) : (
+                  <motion.div 
+                    className="flex items-center gap-1"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    key="show"
+                  >
+                    Show Details <ChevronUp className="h-4 w-4" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </Button>
+          </motion.div>
         </motion.div>
 
         {/* Plant detail indicators - appear when hovering over the model */}
