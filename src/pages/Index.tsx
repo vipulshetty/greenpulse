@@ -5,6 +5,7 @@ import Layout from '@/components/Layout';
 import SensorGrid from '@/components/SensorGrid';
 import DashboardCharts from '@/components/DashboardCharts';
 import PageTransition from '@/components/PageTransition';
+import NPKAnalysis from '@/components/NPKAnalysis';
 import { motion } from 'framer-motion';
 
 // Mock data generation utility
@@ -37,7 +38,8 @@ const Index = () => {
     soilMoisture: 42,
     lightIntensity: 76,
     nitrogenLevel: 15,
-    phosphorusLevel: 8.3
+    phosphorusLevel: 8.3,
+    potassiumLevel: 12.5
   });
   
   // Simulate updating sensor values periodically
@@ -49,7 +51,8 @@ const Index = () => {
         soilMoisture: Math.min(100, Math.max(0, prev.soilMoisture + Math.floor(Math.random() * 3 - 1))),
         lightIntensity: Math.min(100, Math.max(0, prev.lightIntensity + Math.floor(Math.random() * 4 - 2))),
         nitrogenLevel: Number((prev.nitrogenLevel + (Math.random() * 0.4 - 0.2)).toFixed(1)),
-        phosphorusLevel: Number((prev.phosphorusLevel + (Math.random() * 0.3 - 0.15)).toFixed(1))
+        phosphorusLevel: Number((prev.phosphorusLevel + (Math.random() * 0.3 - 0.15)).toFixed(1)),
+        potassiumLevel: Number((prev.potassiumLevel + (Math.random() * 0.35 - 0.175)).toFixed(1))
       }));
     }, 5000);
     
@@ -76,6 +79,13 @@ const Index = () => {
           >
             Plant Monitoring Dashboard
           </motion.h1>
+          
+          {/* NPK Analysis Section */}
+          <NPKAnalysis 
+            nitrogenLevel={sensorData.nitrogenLevel}
+            phosphorusLevel={sensorData.phosphorusLevel}
+            potassiumLevel={sensorData.potassiumLevel}
+          />
           
           {/* Sensor Cards Grid */}
           <SensorGrid sensorData={sensorData} />
