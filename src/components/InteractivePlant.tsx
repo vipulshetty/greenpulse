@@ -1,11 +1,11 @@
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronUp, Droplet, Thermometer as ThermometerIcon, Sun, Sprout } from 'lucide-react';
+import { ChevronDown, ChevronUp, Droplet, Thermometer as ThermometerIcon, Sun, Sprout, Camera } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import PlantCanvas from './plant/PlantCanvas';
 import PlantSensorDetails from './plant/PlantSensorDetails';
+import PlantDiseaseDetector from './PlantDiseaseDetector';
 import { SensorDataType, SensorDetailType } from './plant/types';
 
 interface InteractivePlantProps {
@@ -16,8 +16,10 @@ interface InteractivePlantProps {
 const InteractivePlant: React.FC<InteractivePlantProps> = ({ sensorData, className }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [activeDetail, setActiveDetail] = useState<string | null>(null);
+  const [showDiseaseDetector, setShowDiseaseDetector] = useState(false);
   
   const toggleDetails = () => setShowDetails(!showDetails);
+  const toggleDiseaseDetector = () => setShowDiseaseDetector(!showDiseaseDetector);
   
   const details: SensorDetailType[] = [
     { 
@@ -98,6 +100,29 @@ const InteractivePlant: React.FC<InteractivePlantProps> = ({ sensorData, classNa
           </h3>
         </motion.div>
 
+        {/* Camera button for disease detection */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.6, duration: 0.5 }}
+          className="absolute top-4 right-4"
+        >
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Button
+              variant="secondary"
+              size="sm"
+              className="gap-1 shadow-xl bg-background/80 backdrop-blur-md border border-primary/10"
+              onClick={toggleDiseaseDetector}
+            >
+              <Camera className="h-4 w-4" />
+              <span>Detect Disease</span>
+            </Button>
+          </motion.div>
+        </motion.div>
+
         {/* Interactive details toggle button */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -156,6 +181,20 @@ const InteractivePlant: React.FC<InteractivePlantProps> = ({ sensorData, classNa
                 activeDetail={activeDetail}
                 setActiveDetail={setActiveDetail}
               />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Plant disease detector - appears when camera button is clicked */}
+        <AnimatePresence>
+          {showDiseaseDetector && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-4 z-10"
+            >
+              <PlantDiseaseDetector />
             </motion.div>
           )}
         </AnimatePresence>
