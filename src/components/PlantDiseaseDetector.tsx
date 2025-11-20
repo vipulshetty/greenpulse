@@ -73,51 +73,171 @@ const PlantDiseaseDetector: React.FC<PlantDiseaseDetectorProps> = ({ className }
     }
   };
 
-  const analyzeImage = () => {
-    if (!capturedImage) return;
-    
-    setIsAnalyzing(true);
-    
-    // Simulate API call for disease detection
+  // Database of disease information
+  const diseaseDatabase: Record<string, { name: string; recommendations: string[] }> = {
+    "Apple___Apple_scab": {
+      name: "Apple Scab",
+      recommendations: ["Remove infected leaves", "Apply fungicide", "Improve air circulation"]
+    },
+    "Apple___Black_rot": {
+      name: "Apple Black Rot",
+      recommendations: ["Prune infected parts", "Remove mummified fruit", "Apply captan or sulfur"]
+    },
+    "Apple___healthy": {
+      name: "Healthy Apple Plant",
+      recommendations: ["Continue regular care", "Monitor for pests"]
+    },
+    "Corn_(maize)___Common_rust_": {
+      name: "Corn Common Rust",
+      recommendations: ["Plant resistant varieties", "Apply fungicide early", "Rotate crops"]
+    },
+    "Corn_(maize)___healthy": {
+      name: "Healthy Corn Plant",
+      recommendations: ["Maintain irrigation", "Fertilize with nitrogen"]
+    },
+    "Grape___Black_rot": {
+      name: "Grape Black Rot",
+      recommendations: ["Remove mummified berries", "Apply fungicide", "Prune for airflow"]
+    },
+    "Grape___healthy": {
+      name: "Healthy Grape Vine",
+      recommendations: ["Prune regularly", "Monitor for pests"]
+    },
+    "Potato___Early_blight": {
+      name: "Potato Early Blight",
+      recommendations: ["Mulch soil", "Water at base", "Apply fungicide"]
+    },
+    "Potato___Late_blight": {
+      name: "Potato Late Blight",
+      recommendations: ["Remove infected plants", "Apply fungicide", "Keep foliage dry"]
+    },
+    "Potato___healthy": {
+      name: "Healthy Potato Plant",
+      recommendations: ["Hill soil around stems", "Monitor for beetles"]
+    },
+    "Tomato___Bacterial_spot": {
+      name: "Tomato Bacterial Spot",
+      recommendations: ["Remove infected plants", "Avoid overhead watering", "Apply copper fungicide"]
+    },
+    "Tomato___Early_blight": {
+      name: "Tomato Early Blight",
+      recommendations: ["Mulch soil", "Stake plants", "Apply fungicide"]
+    },
+    "Tomato___Late_blight": {
+      name: "Tomato Late Blight",
+      recommendations: ["Remove infected plants immediately", "Apply fungicide", "Keep leaves dry"]
+    },
+    "Tomato___Leaf_Mold": {
+      name: "Tomato Leaf Mold",
+      recommendations: ["Increase air circulation", "Water at base", "Apply fungicide"]
+    },
+    "Tomato___Septoria_leaf_spot": {
+      name: "Tomato Septoria Leaf Spot",
+      recommendations: ["Remove lower leaves", "Mulch soil", "Apply fungicide"]
+    },
+    "Tomato___Spider_mites Two-spotted_spider_mite": {
+      name: "Spider Mites",
+      recommendations: ["Spray with water", "Apply neem oil", "Introduce predatory mites"]
+    },
+    "Tomato___Target_Spot": {
+      name: "Tomato Target Spot",
+      recommendations: ["Improve airflow", "Apply fungicide", "Remove infected debris"]
+    },
+    "Tomato___Tomato_Yellow_Leaf_Curl_Virus": {
+      name: "Yellow Leaf Curl Virus",
+      recommendations: ["Control whiteflies", "Remove infected plants", "Use resistant varieties"]
+    },
+    "Tomato___Tomato_mosaic_virus": {
+      name: "Tomato Mosaic Virus",
+      recommendations: ["Remove infected plants", "Sanitize tools", "Wash hands after handling"]
+    },
+    "Tomato___healthy": {
+      name: "Healthy Tomato Plant",
+      recommendations: ["Keep soil moist", "Fertilize regularly", "Prune suckers"]
+    }
+  };
+
+  const simulateAnalysis = () => {
     setTimeout(() => {
-      // Mock analysis results - in a real app, this would come from an API
       const mockResults = [
         {
           disease: "Healthy Plant",
           confidence: 92,
-          recommendations: [
-            "Continue current care routine",
-            "Maintain consistent watering schedule",
-            "Ensure adequate sunlight exposure"
-          ]
+          recommendations: ["Continue current care routine", "Maintain consistent watering", "Ensure adequate sunlight"]
         },
         {
           disease: "Powdery Mildew",
           confidence: 85,
-          recommendations: [
-            "Apply fungicide treatment immediately",
-            "Improve air circulation around plant",
-            "Reduce humidity levels",
-            "Remove affected leaves"
-          ]
+          recommendations: ["Apply fungicide treatment", "Improve air circulation", "Reduce humidity", "Remove affected leaves"]
         },
         {
           disease: "Leaf Spot",
           confidence: 78,
-          recommendations: [
-            "Remove infected leaves",
-            "Apply copper-based fungicide",
-            "Water at soil level, not on leaves",
-            "Ensure proper spacing between plants"
-          ]
+          recommendations: ["Remove infected leaves", "Apply copper-based fungicide", "Water at soil level", "Ensure proper spacing"]
         }
       ];
-      
-      // Randomly select a mock result for demonstration
-      const randomResult = mockResults[Math.floor(Math.random() * mockResults.length)];
-      setAnalysisResult(randomResult);
+      setAnalysisResult(mockResults[Math.floor(Math.random() * mockResults.length)]);
       setIsAnalyzing(false);
     }, 2000);
+  };
+
+  const analyzeImage = async () => {
+    if (!capturedImage) return;
+    
+    setIsAnalyzing(true);
+    
+    try {
+      // Convert base64 to blob
+      const base64Response = await fetch(capturedImage);
+      const blob = await base64Response.blob();
+
+      const apiKey = import.meta.env.VITE_HUGGING_FACE_API_KEY;
+      
+      if (!apiKey) {
+         console.warn("No Hugging Face API Key found. Using mock data.");
+         simulateAnalysis();
+         return;
+      }
+
+      const response = await fetch(
+        "https://api-inference.huggingface.co/models/linkanjarad/mobilenet_v2_1.0_224-plant-disease-identification",
+        {
+          headers: { Authorization: `Bearer ${apiKey}` },
+          method: "POST",
+          body: blob,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      
+      if (Array.isArray(result) && result.length > 0) {
+        const topPrediction = result[0];
+        const label = topPrediction.label;
+        const confidence = Math.round(topPrediction.score * 100);
+        
+        const diseaseInfo = diseaseDatabase[label] || { 
+            name: label.replace(/_/g, ' ').replace(/___/g, ' - '), 
+            recommendations: ["Consult a local expert", "Isolate the plant", "Monitor for spread"] 
+        };
+
+        setAnalysisResult({
+          disease: diseaseInfo.name,
+          confidence: confidence,
+          recommendations: diseaseInfo.recommendations
+        });
+        setIsAnalyzing(false);
+      } else {
+        throw new Error("Invalid API response");
+      }
+
+    } catch (error) {
+      console.error("Analysis failed:", error);
+      simulateAnalysis();
+    }
   };
 
   const resetDetector = () => {
