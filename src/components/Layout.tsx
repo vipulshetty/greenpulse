@@ -61,9 +61,11 @@ const Layout = ({ children }: LayoutProps) => {
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         <div className="flex-1 flex flex-col">
-          <TopNav alerts={sampleAlerts} className="border-b" />
+          <TopNav alerts={sampleAlerts} className="border-b border-green-100 bg-white/95 shadow-sm" />
           <main className="flex-1 overflow-auto p-6">
-            {children}
+            <div className="max-w-7xl mx-auto">
+              {children}
+            </div>
           </main>
         </div>
       </div>

@@ -13,9 +13,11 @@ interface SensorGridProps {
     nitrogenLevel: number;
     phosphorusLevel: number;
   };
+  windSpeed?: number;
+  weatherCondition?: string;
 }
 
-const SensorGrid = ({ sensorData }: SensorGridProps) => {
+const SensorGrid = ({ sensorData, windSpeed = 0, weatherCondition = "Unknown" }: SensorGridProps) => {
   // Determine status based on sensor values
   const getMoistureStatus = (value: number) => {
     if (value < 30) return 'alert';
@@ -123,15 +125,15 @@ const SensorGrid = ({ sensorData }: SensorGridProps) => {
       
       <SensorCard
         title="Wind Speed"
-        value="3.2"
-        unit="m/s"
+        value={windSpeed}
+        unit="km/h"
         icon={<Wind />}
         status="normal"
       />
       
       <SensorCard
         title="Forecast"
-        value="Partly Cloudy"
+        value={weatherCondition}
         unit=""
         icon={<Cloud />}
         status="normal"

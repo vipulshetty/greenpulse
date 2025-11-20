@@ -116,123 +116,121 @@ const NPKAnalysis = ({ nitrogenLevel, phosphorusLevel, potassiumLevel }: NPKAnal
 
   const healthStatus = getHealthStatus();
 
+  const getNutrientStatus = (value: number, min: number, max: number) => {
+    if (value < min) return { status: 'low', color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-200' };
+    if (value > max) return { status: 'high', color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-200' };
+    return { status: 'optimal', color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200' };
+  };
+
+  const nitrogenStatus = getNutrientStatus(nitrogenLevel, 10, 25);
+  const phosphorusStatus = getNutrientStatus(phosphorusLevel, 5, 15);
+  const potassiumStatus = getNutrientStatus(potassiumLevel, 8, 20);
+
+  // Simple health message for farmers
+  const getHealthMessage = () => {
+    if (overallHealth === 'critical') {
+      return {
+        icon: '🚨',
+        title: 'Plant Needs Urgent Care!',
+        message: 'Your plant is not getting enough nutrients. Add fertilizer soon to keep it healthy.',
+        color: 'text-red-700',
+        bg: 'bg-red-50',
+        border: 'border-red-300'
+      };
+    } else if (overallHealth === 'warning') {
+      return {
+        icon: '⚠️',
+        title: 'Plant Needs Attention',
+        message: 'Your plant is okay but could be healthier. Consider adding some fertilizer.',
+        color: 'text-orange-700',
+        bg: 'bg-orange-50',
+        border: 'border-orange-300'
+      };
+    } else {
+      return {
+        icon: '✅',
+        title: 'Plant is Healthy!',
+        message: 'Your plant is getting good nutrition. Keep doing what you\'re doing!',
+        color: 'text-green-700',
+        bg: 'bg-green-50',
+        border: 'border-green-300'
+      };
+    }
+  };
+
+  const healthMessage = getHealthMessage();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.4 }}
       className="mb-6"
     >
-      <Card className="overflow-hidden backdrop-blur-md bg-gradient-to-br from-card/90 to-card/70 border border-primary/10 shadow-xl">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Leaf className="h-5 w-5 text-primary" />
-              NPK Analysis & Disease Prediction
-            </CardTitle>
-            <motion.div 
-              className={cn("px-3 py-1 rounded-full text-sm font-medium", healthStatus.bg, healthStatus.color)}
-              animate={{ scale: [1, 1.05, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              {healthStatus.text}
-            </motion.div>
-          </div>
+      <Card className="overflow-hidden bg-white border border-green-100 shadow-sm">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-gray-900 text-lg">
+            <Leaf className="h-5 w-5 text-green-600" />
+            Plant Health Status
+          </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* NPK Values */}
-            <motion.div 
-              className="space-y-4"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <h3 className="text-sm font-semibold text-muted-foreground mb-3">Current Nutrient Levels</h3>
-              
-              <div className="space-y-3">
-                {/* Nitrogen */}
-                <div className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-blue-500/10 to-transparent border border-blue-500/20">
-                  <div>
-                    <p className="text-sm font-medium">Nitrogen (N)</p>
-                    <p className="text-xs text-muted-foreground">Optimal: 10-25 mg/kg</p>
-                  </div>
-                  <motion.div 
-                    className="text-2xl font-bold text-blue-600"
-                    key={nitrogenLevel}
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                  >
-                    {nitrogenLevel}
-                  </motion.div>
-                </div>
+        <CardContent className="space-y-6">
+          {/* Health Status Message - Big and Clear */}
+          <div className={cn("p-6 rounded-lg border-2", healthMessage.bg, healthMessage.border)}>
+            <div className="text-center">
+              <div className="text-5xl mb-3">{healthMessage.icon}</div>
+              <h3 className={cn("text-2xl font-bold mb-2", healthMessage.color)}>
+                {healthMessage.title}
+              </h3>
+              <p className="text-base text-gray-700 max-w-xl mx-auto">
+                {healthMessage.message}
+              </p>
+            </div>
+          </div>
 
-                {/* Phosphorus */}
-                <div className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-purple-500/10 to-transparent border border-purple-500/20">
-                  <div>
-                    <p className="text-sm font-medium">Phosphorus (P)</p>
-                    <p className="text-xs text-muted-foreground">Optimal: 5-15 mg/kg</p>
-                  </div>
-                  <motion.div 
-                    className="text-2xl font-bold text-purple-600"
-                    key={phosphorusLevel}
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                  >
-                    {phosphorusLevel}
-                  </motion.div>
+          {/* NPK Values in 3 Columns - Simple Display */}
+          <div>
+            <h4 className="text-sm font-semibold text-gray-600 mb-3 text-center">Nutrient Levels</h4>
+            <div className="grid grid-cols-3 gap-3">
+              {/* Nitrogen */}
+              <div className={cn("p-4 rounded-lg border text-center", nitrogenStatus.bg, nitrogenStatus.border)}>
+                <div className="text-xs text-gray-600 mb-1">Nitrogen</div>
+                <div className={cn("text-2xl font-bold", nitrogenStatus.color)}>
+                  {nitrogenLevel}
                 </div>
-
-                {/* Potassium */}
-                <div className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-amber-500/10 to-transparent border border-amber-500/20">
-                  <div>
-                    <p className="text-sm font-medium">Potassium (K)</p>
-                    <p className="text-xs text-muted-foreground">Optimal: 8-20 mg/kg</p>
-                  </div>
-                  <motion.div 
-                    className="text-2xl font-bold text-amber-600"
-                    key={potassiumLevel}
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                  >
-                    {potassiumLevel}
-                  </motion.div>
+                <div className={cn("text-xs font-semibold mt-1", nitrogenStatus.color)}>
+                  {nitrogenStatus.status === 'low' && '⬇️ Low'}
+                  {nitrogenStatus.status === 'high' && '⬆️ High'}
+                  {nitrogenStatus.status === 'optimal' && '✓ Good'}
                 </div>
               </div>
-            </motion.div>
 
-            {/* Disease Predictions */}
-            <motion.div 
-              className="space-y-3"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <h3 className="text-sm font-semibold text-muted-foreground mb-3">Disease Risk Assessment</h3>
-              
-              <div className="space-y-2 max-h-[280px] overflow-y-auto pr-2 custom-scrollbar">
-                {diseases.map((disease, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 + index * 0.1 }}
-                    className={cn(
-                      "p-3 rounded-lg border",
-                      getSeverityColor(disease.severity)
-                    )}
-                  >
-                    <div className="flex items-start gap-2">
-                      {getSeverityIcon(disease.severity)}
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">{disease.name}</p>
-                        <p className="text-xs text-muted-foreground mt-1">{disease.cause}</p>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
+              {/* Phosphorus */}
+              <div className={cn("p-4 rounded-lg border text-center", phosphorusStatus.bg, phosphorusStatus.border)}>
+                <div className="text-xs text-gray-600 mb-1">Phosphorus</div>
+                <div className={cn("text-2xl font-bold", phosphorusStatus.color)}>
+                  {phosphorusLevel}
+                </div>
+                <div className={cn("text-xs font-semibold mt-1", phosphorusStatus.color)}>
+                  {phosphorusStatus.status === 'low' && '⬇️ Low'}
+                  {phosphorusStatus.status === 'high' && '⬆️ High'}
+                  {phosphorusStatus.status === 'optimal' && '✓ Good'}
+                </div>
               </div>
-            </motion.div>
+
+              {/* Potassium */}
+              <div className={cn("p-4 rounded-lg border text-center", potassiumStatus.bg, potassiumStatus.border)}>
+                <div className="text-xs text-gray-600 mb-1">Potassium</div>
+                <div className={cn("text-2xl font-bold", potassiumStatus.color)}>
+                  {potassiumLevel}
+                </div>
+                <div className={cn("text-xs font-semibold mt-1", potassiumStatus.color)}>
+                  {potassiumStatus.status === 'low' && '⬇️ Low'}
+                  {potassiumStatus.status === 'high' && '⬆️ High'}
+                  {potassiumStatus.status === 'optimal' && '✓ Good'}
+                </div>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>

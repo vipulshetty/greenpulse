@@ -31,38 +31,17 @@ const ChartCard = ({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ 
-        type: "spring", 
-        stiffness: 300, 
-        damping: 25,
-        duration: 0.8, 
-        delay: 0.1 
-      }}
-      whileHover={{ 
-        scale: 1.02,
-        boxShadow: "0px 10px 30px rgba(0, 0, 0, 0.15)",
-        transition: { type: "spring", stiffness: 400 } 
-      }}
+      transition={{ duration: 0.4 }}
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
     >
-      <Card className={cn("overflow-hidden backdrop-blur-md bg-gradient-to-br from-card/90 to-card/70 border border-primary/10 shadow-lg rounded-xl", className)}>
-        <CardHeader className="pb-2">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <CardTitle className="text-lg font-medium bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-              {title}
-            </CardTitle>
-          </motion.div>
+      <Card className={cn("overflow-hidden bg-white border border-green-100 shadow-sm hover:shadow-md transition-shadow duration-200", className)}>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg font-semibold text-gray-900">
+            {title}
+          </CardTitle>
         </CardHeader>
         <CardContent className="p-4">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, delay: 0.4 }}
-            className="h-[200px] w-full"
-          >
+          <div className="h-[200px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
                 data={data}
@@ -75,46 +54,32 @@ const ChartCard = ({
               >
                 <defs>
                   <linearGradient id={`colorGradient-${color.replace('#', '')}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={color} stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor={color} stopOpacity={0.2}/>
+                    <stop offset="5%" stopColor={color} stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor={color} stopOpacity={0.05}/>
                   </linearGradient>
-                  <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="4" result="blur" />
-                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                  </filter>
                 </defs>
                 
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(224, 224, 224, 0.25)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 
                 <XAxis 
                   dataKey="time" 
-                  tick={{ fontSize: 12, fill: 'rgba(120, 120, 120, 0.9)' }}
-                  tickMargin={10}
-                  stroke="rgba(180, 180, 180, 0.3)"
-                  tickLine={false}
+                  tick={{ fontSize: 11, fill: '#6b7280' }}
+                  stroke="#d1d5db"
                 />
                 
                 <YAxis 
                   unit={yAxisUnit}
-                  tick={{ fontSize: 12, fill: 'rgba(120, 120, 120, 0.9)' }}
-                  tickMargin={10}
-                  stroke="rgba(180, 180, 180, 0.3)"
-                  tickLine={false}
-                  axisLine={false}
+                  tick={{ fontSize: 11, fill: '#6b7280' }}
+                  stroke="#d1d5db"
                 />
                 
                 <Tooltip 
                   contentStyle={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                    backdropFilter: 'blur(8px)',
-                    borderRadius: '12px',
-                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                    border: '1px solid rgba(200, 200, 200, 0.3)',
-                    padding: '12px'
+                    backgroundColor: 'white',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                    border: '1px solid #e5e7eb',
                   }}
-                  formatter={(value: number) => [`${value}${yAxisUnit}`, title]}
-                  labelFormatter={(label) => `Time: ${label}`}
-                  animationDuration={300}
                 />
                 
                 <Area
@@ -122,27 +87,19 @@ const ChartCard = ({
                   dataKey={dataKey}
                   fill={`url(#colorGradient-${color.replace('#', '')})`}
                   stroke="transparent"
-                  animationDuration={2000}
                 />
                 
                 <Line
                   type="monotone"
                   dataKey={dataKey}
                   stroke={color}
-                  strokeWidth={3}
-                  dot={{ r: 3, strokeWidth: 2, fill: '#fff' }}
-                  activeDot={{ 
-                    r: 6, 
-                    strokeWidth: 0,
-                    fill: color,
-                    filter: "url(#glow)"
-                  }}
-                  animationDuration={1500}
-                  animationEasing="ease-out"
+                  strokeWidth={2}
+                  dot={{ r: 2, fill: color }}
+                  activeDot={{ r: 4, fill: color }}
                 />
               </LineChart>
             </ResponsiveContainer>
-          </motion.div>
+          </div>
         </CardContent>
       </Card>
     </motion.div>
