@@ -8,6 +8,8 @@ interface NPKAnalysisProps {
   nitrogenLevel: number;
   phosphorusLevel: number;
   potassiumLevel: number;
+  healthStatus?: string;
+  recommendation?: string;
 }
 
 interface Disease {
@@ -16,7 +18,7 @@ interface Disease {
   cause: string;
 }
 
-const NPKAnalysis = ({ nitrogenLevel, phosphorusLevel, potassiumLevel }: NPKAnalysisProps) => {
+const NPKAnalysis = ({ nitrogenLevel, phosphorusLevel, potassiumLevel, healthStatus, recommendation }: NPKAnalysisProps) => {
   // Analyze NPK levels and predict potential diseases
   const analyzeDiseases = (): Disease[] => {
     const diseases: Disease[] = [];
@@ -87,8 +89,10 @@ const NPKAnalysis = ({ nitrogenLevel, phosphorusLevel, potassiumLevel }: NPKAnal
   };
 
   const diseases = analyzeDiseases();
-  const overallHealth = diseases.every(d => d.severity === 'low') ? 'healthy' : 
-                        diseases.some(d => d.severity === 'high') ? 'critical' : 'warning';
+  // Use API health status if available, otherwise fallback to local logic
+  const overallHealth = healthStatus ? (healthStatus.toLowerCase().includes('healthy') ? 'healthy' : 'critical') :
+    (diseases.every(d => d.severity === 'low') ? 'healthy' :
+      diseases.some(d => d.severity === 'high') ? 'critical' : 'warning');
 
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
@@ -114,7 +118,7 @@ const NPKAnalysis = ({ nitrogenLevel, phosphorusLevel, potassiumLevel }: NPKAnal
     }
   };
 
-  const healthStatus = getHealthStatus();
+  const healthStatusObj = getHealthStatus();
 
   const getNutrientStatus = (value: number, min: number, max: number) => {
     if (value < min) return { status: 'low', color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-200' };
@@ -128,6 +132,19 @@ const NPKAnalysis = ({ nitrogenLevel, phosphorusLevel, potassiumLevel }: NPKAnal
 
   // Simple health message for farmers
   const getHealthMessage = () => {
+    // If we have a recommendation from the API, use it
+    if (recommendation && recommendation !== "Waiting for data...") {
+      const isHealthy = healthStatus?.toLowerCase().includes('healthy');
+      return {
+        icon: isHealthy ? '✅' : '🚨',
+        title: healthStatus || 'Plant Health Analysis',
+        message: recommendation,
+        color: isHealthy ? 'text-green-700' : 'text-red-700',
+        bg: isHealthy ? 'bg-green-50' : 'bg-red-50',
+        border: isHealthy ? 'border-green-300' : 'border-red-300'
+      };
+    }
+
     if (overallHealth === 'critical') {
       return {
         icon: '🚨',
