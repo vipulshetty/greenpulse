@@ -2,7 +2,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import ChartCard from './ChartCard';
-import ControlPanel from './ControlPanel';
 import InteractivePlant from './InteractivePlant';
 
 interface DataPoint {
@@ -37,8 +36,8 @@ const DashboardCharts = ({ temperatureData, moistureData, sensorData }: Dashboar
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       transition: {
         type: "spring",
@@ -49,7 +48,7 @@ const DashboardCharts = ({ temperatureData, moistureData, sensorData }: Dashboar
   };
 
   return (
-    <motion.div 
+    <motion.div
       className="space-y-6 mt-6"
       variants={containerVariants}
       initial="hidden"
@@ -61,8 +60,8 @@ const DashboardCharts = ({ temperatureData, moistureData, sensorData }: Dashboar
       >
         <InteractivePlant sensorData={sensorData} className="lg:col-span-3 mb-2" />
       </motion.div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <motion.div variants={itemVariants}>
           <ChartCard
             title="Temperature History (24h)"
@@ -72,7 +71,7 @@ const DashboardCharts = ({ temperatureData, moistureData, sensorData }: Dashboar
             className="lg:col-span-1"
           />
         </motion.div>
-        
+
         <motion.div variants={itemVariants}>
           <ChartCard
             title="Moisture History (24h)"
@@ -81,10 +80,6 @@ const DashboardCharts = ({ temperatureData, moistureData, sensorData }: Dashboar
             color="#3b82f6"
             className="lg:col-span-1"
           />
-        </motion.div>
-        
-        <motion.div variants={itemVariants}>
-          <ControlPanel className="lg:col-span-1" />
         </motion.div>
       </div>
     </motion.div>

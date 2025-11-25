@@ -1,8 +1,9 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertTriangle, CheckCircle, XCircle, Leaf } from 'lucide-react';
+import { AlertTriangle, CheckCircle, XCircle, Leaf, MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { Button } from "@/components/ui/button";
 
 interface NPKAnalysisProps {
   nitrogenLevel: number;
@@ -177,6 +178,20 @@ const NPKAnalysis = ({ nitrogenLevel, phosphorusLevel, potassiumLevel, healthSta
 
   const healthMessage = getHealthMessage();
 
+  const handleShareAlert = () => {
+    const message = `*Plant Health Alert* 🌱\n\n` +
+      `*Status:* ${healthMessage.title}\n` +
+      `*Message:* ${healthMessage.message}\n\n` +
+      `*Nutrient Levels:*\n` +
+      `- Nitrogen: ${nitrogenLevel}\n` +
+      `- Phosphorus: ${phosphorusLevel}\n` +
+      `- Potassium: ${potassiumLevel}\n\n` +
+      `Sent from Green Pulse Dashboard`;
+
+    const encodedMessage = encodeURIComponent(message);
+    window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: -20 }}
@@ -185,11 +200,20 @@ const NPKAnalysis = ({ nitrogenLevel, phosphorusLevel, potassiumLevel, healthSta
       className="mb-6"
     >
       <Card className="overflow-hidden bg-white border border-green-100 shadow-sm">
-        <CardHeader className="pb-4">
+        <CardHeader className="pb-4 flex flex-row items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-gray-900 text-lg">
             <Leaf className="h-5 w-5 text-green-600" />
             Plant Health Status
           </CardTitle>
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2 text-green-700 border-green-200 hover:bg-green-50"
+            onClick={handleShareAlert}
+          >
+            <MessageCircle className="h-4 w-4" />
+            Share Alert
+          </Button>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Health Status Message - Big and Clear */}
