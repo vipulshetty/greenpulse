@@ -7,6 +7,14 @@ export default defineConfig({
   server: {
     host: "::",
     port: 8080,
+    proxy: {
+      '/api/hf': {
+        target: 'https://api-inference.huggingface.co',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/hf/, ''),
+        secure: false,
+      },
+    },
   },
   plugins: [
     react(),

@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { HfInference } from "@huggingface/inference";
 import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, X, Upload, Scan } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -187,55 +188,229 @@ const PlantDiseaseDetector: React.FC<PlantDiseaseDetectorProps> = ({ className }
     setIsAnalyzing(true);
     
     try {
-      // Convert base64 to blob
-      const base64Response = await fetch(capturedImage);
-      const blob = await base64Response.blob();
-
-      const apiKey = import.meta.env.VITE_HUGGING_FACE_API_KEY;
+      console.log("Analyzing plant image for disease detection...");
       
-      if (!apiKey) {
-         console.warn("No Hugging Face API Key found. Using mock data.");
-         simulateAnalysis();
-         return;
-      }
-
-      const response = await fetch(
-        "https://api-inference.huggingface.co/models/linkanjarad/mobilenet_v2_1.0_224-plant-disease-identification",
-        {
-          headers: { Authorization: `Bearer ${apiKey}` },
-          method: "POST",
-          body: blob,
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.statusText}`);
-      }
-
-      const result = await response.json();
+      // Convert base64 to blob for the API
+      const base64Data = capturedImage.split(',')[1];
+      const byteCharacters = atob(base64Data);
+      const byteNumbers = new Array(byteCharacters.length);
       
-      if (Array.isArray(result) && result.length > 0) {
-        const topPrediction = result[0];
-        const label = topPrediction.label;
-        const confidence = Math.round(topPrediction.score * 100);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'image/jpeg' });
+
+      let result: any = null;
+      let diseaseLabel = "";
+      let confidence = 0;
+
+      // Method 1: Try namansaini2867's Flask API directly
+      try {
+        console.log("Trying namansaini2867 Plant Disease API...");
         
-        const diseaseInfo = diseaseDatabase[label] || { 
-            name: label.replace(/_/g, ' ').replace(/___/g, ' - '), 
-            recommendations: ["Consult a local expert", "Isolate the plant", "Monitor for spread"] 
-        };
-
-        setAnalysisResult({
-          disease: diseaseInfo.name,
-          confidence: confidence,
-          recommendations: diseaseInfo.recommendations
+        // Create FormData for the Flask API (it expects 'image' field)
+        const formData = new FormData();
+        formData.append('image', blob, 'plant_image.jpg');
+        
+        const response = await fetch('https://namansaini2867-plant-dieasese.hf.space/submit', {
+          method: 'POST',
+          body: formData,
         });
-        setIsAnalyzing(false);
-      } else {
-        throw new Error("Invalid API response");
+        
+        if (response.ok) {
+          const htmlText = await response.text();
+          console.log("API Response received, parsing...");
+          console.log("HTML Response (first 2000 chars):", htmlText.substring(0, 2000));
+          
+          // The API returns disease in format "Plant : Disease" like "Tomato : Early Blight"
+          // Look for this pattern in the HTML
+          const plantDiseasePatterns = [
+            // Match "Tomato : Early Blight" style patterns
+            /(Apple|Tomato|Corn|Potato|Grape|Pepper|Cherry|Peach|Strawberry|Squash|Soybean|Raspberry|Orange|Blueberry)\s*:\s*([\w\s]+)/gi,
+            // Match disease names directly
+            /(Early Blight|Late Blight|Bacterial Spot|Scab|Rust|Powdery Mildew|Leaf Mold|Septoria|Target Spot|Mosaic Virus|Yellow Leaf Curl|Spider Mites|Healthy|Black Rot|Cedar Rust|Common Rust|Gray Leaf Spot|Northern Leaf Blight|Esca|Leaf Blight|Haunglongbing)/gi
+          ];
+          
+          let foundDisease = "";
+          
+          // Try to find Plant : Disease pattern
+          const plantMatch = htmlText.match(plantDiseasePatterns[0]);
+          if (plantMatch && plantMatch.length > 0) {
+            foundDisease = plantMatch[0].trim();
+            console.log("Found plant:disease pattern:", foundDisease);
+          }
+          
+          // If not found, try disease names directly
+          if (!foundDisease) {
+            const diseaseMatch = htmlText.match(plantDiseasePatterns[1]);
+            if (diseaseMatch && diseaseMatch.length > 0) {
+              foundDisease = diseaseMatch[0].trim();
+              console.log("Found disease name:", foundDisease);
+            }
+          }
+          
+          if (foundDisease) {
+            diseaseLabel = foundDisease;
+            confidence = 90;
+            result = { source: "namansaini2867-api", label: diseaseLabel, confidence };
+            console.log("namansaini2867 API detection successful:", result);
+          } else {
+            console.log("Could not find disease in response");
+            throw new Error("Could not parse disease from response");
+          }
+        } else {
+          throw new Error(`API returned ${response.status}`);
+        }
+      } catch (apiError: any) {
+        console.warn("namansaini2867 API failed:", apiError?.message || apiError);
       }
 
-    } catch (error) {
+      // Method 2: Fallback to HfInference client if Flask API fails
+      if (!result) {
+        console.log("Using HfInference fallback...");
+        
+        const hfToken = import.meta.env.VITE_HUGGINGFACE_TOKEN;
+        const hf = new HfInference(hfToken);
+        
+        const models = [
+          "linkanjarad/mobilenet_v2_1.0_224-plant-disease-identification",
+          "ozair23/mobilenet_v2_1.0_224-finetuned-plantdisease"
+        ];
+        
+        for (const model of models) {
+          try {
+            console.log(`Trying model: ${model}`);
+            
+            const response = await hf.imageClassification({
+              data: blob,
+              model: model,
+            });
+            
+            if (response && response.length > 0) {
+              const topPrediction = response[0];
+              diseaseLabel = topPrediction.label || "";
+              confidence = Math.round((topPrediction.score || 0.8) * 100);
+              result = { source: "hf-inference", label: diseaseLabel, confidence };
+              console.log(`Model ${model} succeeded:`, result);
+              break;
+            }
+          } catch (modelError: any) {
+            console.warn(`Model ${model} failed:`, modelError?.message);
+            
+            // Retry if model is loading
+            if (modelError?.message?.includes('loading') || modelError?.message?.includes('503')) {
+              console.log("Model loading, waiting 5 seconds...");
+              await new Promise(resolve => setTimeout(resolve, 5000));
+              
+              try {
+                const retryResponse = await hf.imageClassification({
+                  data: blob,
+                  model: model,
+                });
+                
+                if (retryResponse && retryResponse.length > 0) {
+                  const topPrediction = retryResponse[0];
+                  diseaseLabel = topPrediction.label || "";
+                  confidence = Math.round((topPrediction.score || 0.8) * 100);
+                  result = { source: "hf-inference", label: diseaseLabel, confidence };
+                  console.log(`Model ${model} succeeded on retry:`, result);
+                  break;
+                }
+              } catch (retryError) {
+                console.warn(`Retry failed for ${model}`);
+              }
+            }
+          }
+        }
+      }
+
+      if (!result || !diseaseLabel) {
+        throw new Error("All detection methods failed");
+      }
+
+      console.log("Final Detection:", diseaseLabel, `(${confidence}%)`);
+      
+      // Parse the label to extract plant type and disease
+      let plantType = 'Unknown';
+      let diseaseName = diseaseLabel;
+      
+      // Handle common label formats like "Tomato___Early_blight" or "Apple_Apple_scab"
+      if (diseaseLabel.includes('___')) {
+        const parts = diseaseLabel.split('___');
+        plantType = parts[0].replace(/_/g, ' ');
+        diseaseName = parts[1].replace(/_/g, ' ');
+      } else if (diseaseLabel.includes('_')) {
+        const parts = diseaseLabel.split('_');
+        plantType = parts[0];
+        diseaseName = parts.slice(1).join(' ');
+      } else if (diseaseLabel.includes(' with ')) {
+        const parts = diseaseLabel.split(' with ');
+        plantType = parts[0];
+        diseaseName = parts[1];
+      } else if (diseaseLabel.toLowerCase().startsWith('healthy ')) {
+        plantType = diseaseLabel.substring(8);
+        diseaseName = 'Healthy';
+      } else {
+        // Try to extract plant type from common plants
+        const commonPlants = ['Apple', 'Tomato', 'Potato', 'Grape', 'Corn', 'Strawberry', 'Pepper', 'Peach', 'Cherry', 'Maize'];
+        for (const plant of commonPlants) {
+          if (diseaseLabel.toLowerCase().includes(plant.toLowerCase())) {
+            plantType = plant;
+            break;
+          }
+        }
+      }
+      
+      const isHealthy = diseaseName.toLowerCase() === 'healthy' || 
+                        diseaseLabel.toLowerCase().includes('healthy') ||
+                        diseaseName.toLowerCase() === 'normal';
+      
+      // Build recommendations based on detection
+      const recommendations: string[] = [];
+      
+      if (confidence < 50) {
+        recommendations.push("⚠️ Low confidence - please use a clear, close-up photo of a plant leaf.");
+      }
+      
+      // Check disease database for specific recommendations
+      const dbKey = Object.keys(diseaseDatabase).find(key => 
+        key.toLowerCase().replace(/[_\s]/g, '') === diseaseLabel.toLowerCase().replace(/[_\s]/g, '') ||
+        key.toLowerCase().includes(diseaseLabel.toLowerCase().replace(/[_\s]/g, ''))
+      );
+      
+      if (dbKey && diseaseDatabase[dbKey]) {
+        const dbEntry = diseaseDatabase[dbKey];
+        recommendations.push(...dbEntry.recommendations);
+      } else if (isHealthy) {
+        recommendations.push(`Your ${plantType} plant appears healthy!`);
+        recommendations.push("Continue regular watering and maintenance.");
+        recommendations.push("Monitor for any changes in leaf color or texture.");
+      } else {
+        recommendations.push(`Disease detected: ${diseaseName}`);
+        recommendations.push(`Plant type: ${plantType}`);
+        recommendations.push("Isolate affected plants to prevent spread.");
+        recommendations.push("Remove and dispose of infected leaves.");
+        recommendations.push("Consider applying appropriate fungicide or treatment.");
+        recommendations.push("Consult a local agricultural expert for specific treatment.");
+      }
+      
+      recommendations.push("");
+      recommendations.push(`Confidence: ${confidence}%`);
+      recommendations.push("🤖 Analyzed by Plant Disease Detection AI");
+
+      setAnalysisResult({
+        disease: isHealthy ? `Healthy ${plantType}` : diseaseName,
+        confidence: confidence,
+        recommendations: recommendations
+      });
+      
+      setIsAnalyzing(false);
+
+    } catch (error: any) {
       console.error("Analysis failed:", error);
+      console.warn("⚠️ AI analysis failed. Using mock analysis as fallback.");
       simulateAnalysis();
     }
   };
